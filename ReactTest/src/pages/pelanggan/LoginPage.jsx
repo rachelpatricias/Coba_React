@@ -7,81 +7,51 @@ import Logo from "../../assets/images/Logo.png";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [form, setForm] = useState({ username: "", password: "" });
 
-  const [form, setForm] = useState({
-    username: "",
-    password: "",
-  });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
-  const [errors, setErrors] = useState({
-    username: "",
-    password: "",
-  });
-
-  // ============================
-  // REAL-TIME VALIDATION
-  // ============================
-  const validateField = (name, value) => {
-    let msg = "";
-
-    if (name === "username") {
-      if (!value.trim()) msg = "Username wajib diisi.";
-      else if (value.length < 3) msg = "Username minimal 3 karakter.";
-    }
-
-    if (name === "password") {
-      if (!value.trim()) msg = "Password wajib diisi.";
-      else if (value.length < 6) msg = "Password minimal 6 karakter.";
-    }
-
-    setErrors((prev) => ({ ...prev, [name]: msg }));
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-    validateField(name, value);
-  };
-
-  // ============================
-  // VALIDASI SAAT SUBMIT (satu-per-satu)
-  // ============================
   const handleLogin = (e) => {
     e.preventDefault();
+    const { username, password } = form;
 
-    // Cek username dulu
-    if (!form.username.trim()) {
-      return toast.error("Username wajib diisi!");
-    }
-    if (errors.username) {
-      return toast.error(errors.username);
+    if (!username) return toast.error("Username wajib diisi");
+    if (!password) return toast.error("Password wajib diisi");
+
+    // =========================================
+    // 1. CEK ADMIN
+    // =========================================
+    if (username === "admin" && password === "admin123") {
+      // Simpan data admin
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ username: "admin", role: "admin" })
+      );
+      localStorage.setItem("role", "admin");
+
+      toast.success("Login Admin berhasil!");
+      return navigate("/admin/dashboard");
     }
 
-    // Baru cek password
-    if (!form.password.trim()) {
-      return toast.error("Password wajib diisi!");
-    }
-    if (errors.password) {
-      return toast.error(errors.password);
-    }
-
-    // Ambil user dari localStorage
+    // =========================================
+    // 2. CEK PELANGGAN (LOCALSTORAGE)
+    // =========================================
     const users = JSON.parse(localStorage.getItem("users")) || [];
 
     const found = users.find(
-      (u) => u.username === form.username && u.password === form.password
+      (u) => u.username === username && u.password === password
     );
 
     if (!found) {
-      return toast.error("Akun tidak ditemukan! Silakan register dulu.");
+      return toast.error("Akun tidak ditemukan. Silakan daftar.");
     }
 
-    // Login success
     localStorage.setItem("user", JSON.stringify(found));
     localStorage.setItem("role", "pelanggan");
 
     toast.success("Login berhasil!");
-    navigate("/layanan");
+    navigate("/home");
   };
 
   return (
@@ -94,8 +64,6 @@ const LoginPage = () => {
         </div>
 
         <Form onSubmit={handleLogin}>
-          
-          {/* USERNAME */}
           <FloatingLabel label="Username" className="mb-3">
             <Form.Control
               type="text"
@@ -103,12 +71,10 @@ const LoginPage = () => {
               name="username"
               value={form.username}
               onChange={handleChange}
-              className={errors.username ? "is-invalid login-input" : "login-input"}
+              className="login-input"
             />
-            {errors.username && <div className="error-text">{errors.username}</div>}
           </FloatingLabel>
 
-          {/* PASSWORD */}
           <FloatingLabel label="Password" className="mb-3">
             <Form.Control
               type="password"
@@ -116,9 +82,8 @@ const LoginPage = () => {
               name="password"
               value={form.password}
               onChange={handleChange}
-              className={errors.password ? "is-invalid login-input" : "login-input"}
+              className="login-input"
             />
-            {errors.password && <div className="error-text">{errors.password}</div>}
           </FloatingLabel>
 
           <Button type="submit" className="login-btn w-100 mb-3">
@@ -126,7 +91,7 @@ const LoginPage = () => {
           </Button>
 
           <p className="login-register">
-            Belum punya akun?{" "}
+            Belum punya akun?
             <span className="login-link" onClick={() => navigate("/register")}>
               Daftar di sini
             </span>
