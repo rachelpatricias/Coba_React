@@ -1,0 +1,14 @@
+.carousel-container {
+  margin-top: 20px;
+}
+
+.rounded-carousel {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.carousel-image {
+  height: 350px;        /* Sesuaikan tinggi */
+  object-fit: cover;    /* Biar proporsional */
+  width: 100%;
+}

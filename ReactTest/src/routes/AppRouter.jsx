@@ -28,6 +28,7 @@ import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminLayananPage from "../pages/admin/AdminLayananPage";
 import AdminPesananPage from "../pages/admin/AdminPesananPage";
 import AdminJadwalPage from "../pages/admin/AdminJadwalPage";
+import HomePage from "../pages/pelanggan/HomePage";
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
   {
     element: <MainLayout />,
     children: [
+      { path: "/home", element: <ProtectedUser><HomePage /></ProtectedUser> },
       { path: "/layanan", element: <ProtectedUser><LayananPage /></ProtectedUser> },
       { path: "/booking", element: <ProtectedUser><BookingPage /></ProtectedUser> },
       { path: "/pesanan", element: <ProtectedUser><PesananPage /></ProtectedUser> },

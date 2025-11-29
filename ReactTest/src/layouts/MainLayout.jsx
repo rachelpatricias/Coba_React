@@ -5,7 +5,7 @@ import TopNavbar from "../components/TopNavbar";
 import DynamicPageTitle from "../components/DynamicPageTitle";
 
 const routes = [
-  { path: "/", name: "Home" },
+  { path: "/home", name: "Home" },
   { path: "/layanan", name: "Layanan" },
   { path: "/booking", name: "Booking" },
   { path: "/pesanan", name: "Pesanan" },

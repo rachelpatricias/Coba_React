@@ -1,19 +1,25 @@
-// src/components/ImageCarousel.jsx
-import { Carousel } from "react-bootstrap";
+import { Carousel, Container } from "react-bootstrap";
+import "./ImageCarousel.css";
 
 const ImageCarousel = ({ images }) => {
   return (
-    <Carousel>
-      {images?.map((image, index) => (
-        <Carousel.Item key={index}>
-          <img className="d-block w-100" src={image.img} alt={image.title} />
-          <Carousel.Caption>
-            <h3 className="d-none d-md-block">{image.title}</h3>
-            <p className="d-none d-md-block">{image.description}</p>
-          </Carousel.Caption>
-        </Carousel.Item>
-      ))}
-    </Carousel>
+    <Container className="carousel-container">
+      <Carousel className="rounded-carousel">
+        {images?.map((image, index) => (
+          <Carousel.Item key={index}>
+            <img
+              className="d-block w-100 carousel-image"
+              src={image.img}
+              alt={image.title}
+            />
+            <Carousel.Caption>
+              <h3>{image.title}</h3>
+              <p>{image.description}</p>
+            </Carousel.Caption>
+          </Carousel.Item>
+        ))}
+      </Carousel>
+    </Container>
   );
 };
 
