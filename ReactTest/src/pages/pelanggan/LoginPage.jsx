@@ -28,9 +28,9 @@ const LoginPage = () => {
     const { email, password } = form;
     let newErrors = {};
 
-    // ---------------------------
-    // VALIDASI INPUT
-    // ---------------------------
+    // =======================================
+    // VALIDASI FRONTEND
+    // =======================================
     if (!email) newErrors.email = "Email wajib diisi";
     if (!password) newErrors.password = "Password wajib diisi";
 
@@ -41,50 +41,66 @@ const LoginPage = () => {
     }
 
     try {
-      // ---------------------------
-      // 1. COBA LOGIN ADMIN
-      // ---------------------------
       let response = null;
 
+      // =======================================
+      // 1. COBA LOGIN ADMIN
+      // =======================================
       try {
         response = await axios.post(`${API_BASE}/admin/login`, {
-          email,
+          email: email.toLowerCase(),
           password,
         });
+
+        // Jika berhasil, tetapkan role admin
+        localStorage.setItem("role", "admin");
       } catch (err) {
         response = null;
       }
 
-      // ---------------------------
+      // =======================================
       // 2. JIKA BUKAN ADMIN, COBA LOGIN PELANGGAN
-      // ---------------------------
+      // =======================================
       if (!response) {
         response = await axios.post(`${API_BASE}/pelanggan/login`, {
-          email,
+          email: email.toLowerCase(),
           password,
         });
+
+        // Jika berhasil, role = pelanggan
+        localStorage.setItem("role", "pelanggan");
       }
 
       const data = response.data;
 
-      // Simpan token + user + role
+      // =======================================
+      // SIMPAN TOKEN & DATA USER
+      // =======================================
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("user", JSON.stringify(data.data)); // backend memakai 'data', bukan 'user'
+
+      // Setelah login, set default Authorization
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${data.token}`;
 
       toast.success("Login berhasil!");
 
       // Redirect berdasarkan role
-      if (data.user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/home");
-      }
+      const role = localStorage.getItem("role");
+
+      if (role === "admin") return navigate("/admin/dashboard");
+      return navigate("/home");
     } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Email atau password salah"
-      );
+      const msg = error.response?.data?.message;
+
+      if (msg === "Email atau password salah") {
+        toast.error("Akun belum terdaftar. Silakan daftar dulu.");
+
+        return;
+      }
+
+      toast.error(msg || "Login gagal");
     }
   };
 
@@ -98,7 +114,7 @@ const LoginPage = () => {
         </div>
 
         <Form onSubmit={handleLogin}>
-          {/* EMAIL */}
+          {/* EMAIL INPUT */}
           <FloatingLabel label="Email" className="mb-3">
             <Form.Control
               type="email"
@@ -113,7 +129,7 @@ const LoginPage = () => {
             )}
           </FloatingLabel>
 
-          {/* PASSWORD */}
+          {/* PASSWORD INPUT */}
           <FloatingLabel label="Password" className="mb-3">
             <Form.Control
               type="password"
@@ -121,7 +137,9 @@ const LoginPage = () => {
               name="password"
               value={form.password}
               onChange={handleChange}
-              className={`login-input ${errors.password ? "is-invalid" : ""}`}
+              className={`login-input ${
+                errors.password ? "is-invalid" : ""
+              }`}
             />
             {errors.password && (
               <div className="invalid-feedback">{errors.password}</div>
@@ -134,7 +152,10 @@ const LoginPage = () => {
 
           <p className="login-register">
             Belum punya akun?
-            <span className="login-link" onClick={() => navigate("/register")}>
+            <span
+              className="login-link"
+              onClick={() => navigate("/register")}
+            >
               Daftar di sini
             </span>
           </p>

@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { Form, FloatingLabel, Button } from "react-bootstrap";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./RegisterPage.css";
+
+const API_BASE = "http://localhost:8000/api";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -11,12 +14,13 @@ const RegisterPage = () => {
     nama: "",
     email: "",
     nomor: "",
+    alamat: "",
     password: "",
   });
 
   const [errors, setErrors] = useState({});
 
-  // HANDLE INPUT + VALIDASI REAL-TIME
+  // HANDLE INPUT + VALIDASI REALTIME
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
@@ -41,10 +45,13 @@ const RegisterPage = () => {
 
       case "nomor":
         if (!value.trim()) message = "Nomor HP wajib diisi.";
-        else if (!/^[0-9]+$/.test(value))
-          message = "Nomor HP hanya angka.";
+        else if (!/^[0-9]+$/.test(value)) message = "Nomor HP hanya angka.";
         else if (value.length < 10)
           message = "Nomor HP minimal 10 digit.";
+        break;
+
+      case "alamat":
+        if (!value.trim()) message = "Alamat wajib diisi.";
         break;
 
       case "password":
@@ -75,8 +82,8 @@ const RegisterPage = () => {
     return finalErrors;
   };
 
-  // SUBMIT
-  const handleRegister = (e) => {
+  // SUBMIT REGISTER
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     const finalErrors = validateForm();
@@ -87,91 +94,112 @@ const RegisterPage = () => {
       return;
     }
 
-    const savedUsers = JSON.parse(localStorage.getItem("users")) || [];
+    try {
+      const response = await axios.post(`${API_BASE}/pelanggan/register`, {
+        nama: form.nama,
+        email: form.email.toLowerCase(),
+        no_hp: form.nomor,
+        alamat: form.alamat,
+        password: form.password,
+      });
 
-    const emailExist = savedUsers.find((u) => u.email === form.email);
-    if (emailExist) {
-      return toast.error("Email sudah digunakan!");
+      toast.success("Registrasi berhasil! Silakan login.");
+      navigate("/login");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Gagal melakukan registrasi"
+      );
     }
-
-    const newUser = {
-      id: Date.now().toString(),
-      username: form.nama,
-      email: form.email,
-      nomor: form.nomor,
-      password: form.password,
-      loginAt: new Date().toISOString(),
-    };
-
-    savedUsers.push(newUser);
-    localStorage.setItem("users", JSON.stringify(savedUsers));
-
-    toast.success("Registrasi berhasil!");
-    navigate("/login");
   };
 
   return (
-    <div className="register-bg">
-      <div className="register-card">
+  <div className="register-bg">
+    <div className="register-card">
+      <h2 className="text-center mb-4 register-title">Daftar Pelanggan</h2>
 
-        <h2 className="text-center mb-4 register-title">Daftar Pelanggan</h2>
+      <Form onSubmit={handleRegister}>
+        
+        {/* NAMA */}
+        <FloatingLabel label="Nama Lengkap" className="mb-3">
+          <Form.Control
+            type="text"
+            name="nama"
+            value={form.nama}
+            onChange={handleChange}
+            className={errors.nama ? "is-invalid register-input" : "register-input"}
+          />
+          {errors.nama && <div className="error-text">{errors.nama}</div>}
+        </FloatingLabel>
 
-        <Form onSubmit={handleRegister}>
-          {/* NAMA */}
-          <FloatingLabel label="Nama Lengkap" className="mb-3">
-            <Form.Control
-              type="text"
-              name="nama"
-              value={form.nama}
-              onChange={handleChange}
-              className={errors.nama ? "is-invalid register-input" : "register-input"}
-            />
-            {errors.nama && <div className="error-text">{errors.nama}</div>}
-          </FloatingLabel>
+        {/* EMAIL */}
+        <FloatingLabel label="Email" className="mb-3">
+          <Form.Control
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            className={errors.email ? "is-invalid register-input" : "register-input"}
+          />
+          {errors.email && <div className="error-text">{errors.email}</div>}
+        </FloatingLabel>
 
-          {/* EMAIL */}
-          <FloatingLabel label="Email" className="mb-3">
-            <Form.Control
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              className={errors.email ? "is-invalid register-input" : "register-input"}
-            />
-            {errors.email && <div className="error-text">{errors.email}</div>}
-          </FloatingLabel>
+        {/* NOMOR HP */}
+        <FloatingLabel label="Nomor HP" className="mb-3">
+          <Form.Control
+            type="text"
+            name="nomor"
+            value={form.nomor}
+            onChange={handleChange}
+            className={errors.nomor ? "is-invalid register-input" : "register-input"}
+          />
+          {errors.nomor && <div className="error-text">{errors.nomor}</div>}
+        </FloatingLabel>
 
-          {/* NOMOR */}
-          <FloatingLabel label="Nomor HP" className="mb-3">
-            <Form.Control
-              type="text"
-              name="nomor"
-              value={form.nomor}
-              onChange={handleChange}
-              className={errors.nomor ? "is-invalid register-input" : "register-input"}
-            />
-            {errors.nomor && <div className="error-text">{errors.nomor}</div>}
-          </FloatingLabel>
+        {/* ALAMAT */}
+        <FloatingLabel label="Alamat" className="mb-3">
+          <Form.Control
+            type="text"
+            name="alamat"
+            value={form.alamat}
+            onChange={handleChange}
+            className={errors.alamat ? "is-invalid register-input" : "register-input"}
+          />
+          {errors.alamat && <div className="error-text">{errors.alamat}</div>}
+        </FloatingLabel>
 
-          {/* PASSWORD */}
-          <FloatingLabel label="Password" className="mb-3">
-            <Form.Control
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              className={errors.password ? "is-invalid register-input" : "register-input"}
-            />
-            {errors.password && <div className="error-text">{errors.password}</div>}
-          </FloatingLabel>
+        {/* PASSWORD */}
+        <FloatingLabel label="Password" className="mb-4">
+          <Form.Control
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            className={errors.password ? "is-invalid register-input" : "register-input"}
+          />
+          {errors.password && <div className="error-text">{errors.password}</div>}
+        </FloatingLabel>
 
-          <Button type="submit" className="register-btn w-100">
-            Daftar
-          </Button>
-        </Form>
-      </div>
+        {/* TOMBOL REGISTER */}
+        <Button type="submit" className="register-btn w-100">
+          Daftar
+        </Button>
+
+        {/* LINK KE LOGIN */}
+        <p className="register-login">
+          Sudah punya akun?
+          <span
+            className="register-link"
+            onClick={() => navigate("/login")}
+          >
+            Login di sini
+          </span>
+        </p>
+
+      </Form>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default RegisterPage;
