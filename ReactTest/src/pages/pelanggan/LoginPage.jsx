@@ -2,56 +2,90 @@ import React, { useState } from "react";
 import { Form, FloatingLabel, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import axios from "axios";
 import "./LoginPage.css";
 import Logo from "../../assets/images/Logo.png";
 
+const API_BASE = "http://localhost:8000/api";
+
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", password: "" });
 
-  const handleChange = (e) =>
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
+  };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const { username, password } = form;
+    const { email, password } = form;
+    let newErrors = {};
 
-    if (!username) return toast.error("Username wajib diisi");
-    if (!password) return toast.error("Password wajib diisi");
+    // ---------------------------
+    // VALIDASI INPUT
+    // ---------------------------
+    if (!email) newErrors.email = "Email wajib diisi";
+    if (!password) newErrors.password = "Password wajib diisi";
 
-    // =========================================
-    // 1. CEK ADMIN
-    // =========================================
-    if (username === "admin" && password === "admin123") {
-      // Simpan data admin
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ username: "admin", role: "admin" })
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Silakan periksa input Anda");
+      return;
+    }
+
+    try {
+      // ---------------------------
+      // 1. COBA LOGIN ADMIN
+      // ---------------------------
+      let response = null;
+
+      try {
+        response = await axios.post(`${API_BASE}/admin/login`, {
+          email,
+          password,
+        });
+      } catch (err) {
+        response = null;
+      }
+
+      // ---------------------------
+      // 2. JIKA BUKAN ADMIN, COBA LOGIN PELANGGAN
+      // ---------------------------
+      if (!response) {
+        response = await axios.post(`${API_BASE}/pelanggan/login`, {
+          email,
+          password,
+        });
+      }
+
+      const data = response.data;
+
+      // Simpan token + user + role
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("role", data.user.role);
+
+      toast.success("Login berhasil!");
+
+      // Redirect berdasarkan role
+      if (data.user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/home");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Email atau password salah"
       );
-      localStorage.setItem("role", "admin");
-
-      toast.success("Login Admin berhasil!");
-      return navigate("/admin/dashboard");
     }
-
-    // =========================================
-    // 2. CEK PELANGGAN (LOCALSTORAGE)
-    // =========================================
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-
-    const found = users.find(
-      (u) => u.username === username && u.password === password
-    );
-
-    if (!found) {
-      return toast.error("Akun tidak ditemukan. Silakan daftar.");
-    }
-
-    localStorage.setItem("user", JSON.stringify(found));
-    localStorage.setItem("role", "pelanggan");
-
-    toast.success("Login berhasil!");
-    navigate("/home");
   };
 
   return (
@@ -64,17 +98,22 @@ const LoginPage = () => {
         </div>
 
         <Form onSubmit={handleLogin}>
-          <FloatingLabel label="Username" className="mb-3">
+          {/* EMAIL */}
+          <FloatingLabel label="Email" className="mb-3">
             <Form.Control
-              type="text"
-              placeholder="Username"
-              name="username"
-              value={form.username}
+              type="email"
+              placeholder="Email"
+              name="email"
+              value={form.email}
               onChange={handleChange}
-              className="login-input"
+              className={`login-input ${errors.email ? "is-invalid" : ""}`}
             />
+            {errors.email && (
+              <div className="invalid-feedback">{errors.email}</div>
+            )}
           </FloatingLabel>
 
+          {/* PASSWORD */}
           <FloatingLabel label="Password" className="mb-3">
             <Form.Control
               type="password"
@@ -82,8 +121,11 @@ const LoginPage = () => {
               name="password"
               value={form.password}
               onChange={handleChange}
-              className="login-input"
+              className={`login-input ${errors.password ? "is-invalid" : ""}`}
             />
+            {errors.password && (
+              <div className="invalid-feedback">{errors.password}</div>
+            )}
           </FloatingLabel>
 
           <Button type="submit" className="login-btn w-100 mb-3">
