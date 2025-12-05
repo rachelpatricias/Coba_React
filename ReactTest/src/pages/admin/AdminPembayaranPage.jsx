@@ -1,95 +1,179 @@
-import React, { useEffect, useEffectEvent, useState } from "react";
-import { Container, Form, FloatingLabel, Button, Card } from "react-bootstrap";
-import { useLocation, useNavigate } from "react-router-dom";
+// src/pages/admin/AdminPegawaiPage.jsx
+import { useEffect, useState } from "react";
+import { Container, Table, Button, Modal, Form } from "react-bootstrap";
 import { toast } from "sonner";
 import { apiFetch } from "../../api/api.js";
+import TopNavbar from "../../components/TopNavbar"; // 🔥 TAMBAHKAN INI
 
-const AdminPembayaranPage = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+const AdminPegawaiPage = () => {
+  const [pegawai, setPegawai] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({
+    nama: "",
+    jabatan: "",
+    no_hp: "",
+    alamat: "",
+  });
 
-  const pembayaranId = location.state?.pembayaranId || null;
-
-  const [pembayaran, setPembayaran] = useState(null);
-  const [form, setForm] = useState({status_pembayaran: "",});
+  // 🔥 List menu untuk navbar (SAMA kayak halaman layanan)
+  const adminRoutes = [
+    { name: "Dashboard", path: "/admin/dashboard" },
+    { name: "Layanan", path: "/admin/layanan" },
+    { name: "Pegawai", path: "/admin/pegawai" },
+    { name: "Pesanan", path: "/admin/pesanan" },
+  ];
 
   useEffect(() => {
-    const loadPembayaran = async () => {
-        if(!pembayaranId) return;
+    fetchPegawai();
+  }, []);
 
-        try{
-            const data = await apiFetch(`/admin/pembayaran/${pembayaranId}`);
-
-            setPembayaran(data);
-            setForm({status_pembayaran: data.status_pembayaran});
-        } catch{
-            toast.error("Gagal memuat data pembayaran.");
-        }
-    };
-
-    loadPembayaran();
-  }, [pembayaranId]);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const fetchPegawai = async () => {
+    try {
+      const data = await apiFetch("/pegawai/read");
+      setPegawai(data || []);
+    } catch {
+      toast.error("Gagal mengambil pegawai");
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.nama) return toast.error("Nama wajib diisi!");
 
-    if(!form.status_pembayaran){
-        return toast.error("Pilih status pembayaran.");
-    }
-
-    try{
-        await apiFetch(`/admin/pembayaran/${pembayaranId}/update-status`, {
-            method: "PUT",
-            body: JSON.stringify({
-                status_pembayaran: form.status_pembayaran,
-            }),
+    try {
+      if (editing) {
+        await apiFetch("/pegawai/update", {
+          method: "POST",
+          body: JSON.stringify({ id_pegawai: editing, ...form }),
         });
-
-        toast.success("Status pembayaran berhasil diperbarui.");
-        navigate("/admin/pembayaran");
-    } catch(err){
-        console.error(err);
-        toast.error(err.message || "Gagal memperbarui status.");
+        toast.success("Data pegawai diperbarui");
+      } else {
+        await apiFetch("/pegawai/create", {
+          method: "POST",
+          body: JSON.stringify(form),
+        });
+        toast.success("Pegawai berhasil ditambahkan");
+      }
+      setShowModal(false);
+      setEditing(null);
+      fetchPegawai();
+    } catch {
+      toast.error("Gagal menyimpan data");
     }
   };
 
-  return(
-    <Container className="mt-3">
-        <h2>Update Status Pembayaran</h2>
+  const handleDelete = async (id) => {
+    if (!window.confirm("Yakin menghapus pegawai?")) return;
 
-        <Card className="p-3 mb-3">
-            <h5>Detail Pembayaran</h5>
-            <div>ID Pembayaran: <strong>{pembayaran.id_pembayaran}</strong></div>
-            <div>ID Pemesanan: <strong>{pembayaran.id_pesanan}</strong></div>
-            <div>Layanan: <strong>{pembayaran.pemesanan?.layanan?.nama_layanan}</strong></div>
-            <div>Tanggal Booking: <strong>{pembayaran.pemesanan?.tanggal_booking}</strong></div>
-            <div>Jam Booking: <strong>{pembayaran.pemesanan?.jam_booking}</strong></div>
-            <div className="mt-2"><strong>Total Bayar: Rp {pembayaran.pemesanan?.layanan?.harga}</strong></div>
+    try {
+      await apiFetch(`/pegawai/delete/${id}`, { method: "DELETE" });
+      toast.success("Pegawai dihapus");
+      fetchPegawai();
+    } catch {
+      toast.error("Gagal hapus pegawai");
+    }
+  };
 
-            <div className="mt-2">
-                Status Pembayaran saat ini:
-                <strong>{pembayaran.status_pembayaran}</strong>
-            </div>
-        </Card>
+  return (
+    <>
+      {/* 🔥 Navbar ditambahkan di sini */}
+      <TopNavbar routes={adminRoutes} />
 
-        <Form onSubmit={handleSubmit}>
-            <FloatingLabel label="Status Pembayaran" className="mb-3">
-                <Form.Select name="status_pembayaran" value={form.status_pembayaran} onChange={handleChange}>
-                    <option value="pending">Menunggu</option>
-                    <option value="paid">Lunas</option>
-                </Form.Select>
-            </FloatingLabel>
+      <Container style={{ paddingTop: "100px" }}>
+        <h2>Kelola Pegawai</h2>
 
-            <Button type="submit" className="mt-2">
-                Update Status
-            </Button>
-        </Form>
-    </Container>
-  )
+        <Button
+          className="my-3"
+          onClick={() => {
+            setEditing(null);
+            setForm({ nama: "", jabatan: "", no_hp: "", alamat: "" });
+            setShowModal(true);
+          }}
+        >
+          Tambah Pegawai
+        </Button>
+
+        <Table bordered hover>
+          <thead className="table-primary">
+            <tr>
+              <th>No</th>
+              <th>Nama</th>
+              <th>Jabatan</th>
+              <th>No HP</th>
+              <th>Alamat</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {pegawai?.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center">
+                  Belum ada pegawai
+                </td>
+              </tr>
+            ) : (
+              pegawai.map((p, i) => (
+                <tr key={p.id_pegawai}>
+                  <td>{i + 1}</td>
+                  <td>{p.nama}</td>
+                  <td>{p.jabatan}</td>
+                  <td>{p.no_hp}</td>
+                  <td>{p.alamat}</td>
+                  <td>
+                    <Button
+                      size="sm"
+                      className="me-2"
+                      variant="warning"
+                      onClick={() => {
+                        setEditing(p.id_pegawai);
+                        setForm(p);
+                        setShowModal(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => handleDelete(p.id_pegawai)}
+                    >
+                      Hapus
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </Table>
+
+        {/* MODAL TAMBAH/EDIT */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>{editing ? "Edit Pegawai" : "Tambah Pegawai"}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleSubmit}>
+              {["nama", "jabatan", "no_hp", "alamat"].map((field) => (
+                <Form.Group key={field} className="mb-2">
+                  <Form.Label>{field.toUpperCase()}</Form.Label>
+                  <Form.Control
+                    name={field}
+                    value={form[field] || ""}
+                    onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+                  />
+                </Form.Group>
+              ))}
+              <Button type="submit" className="w-100">
+                Simpan
+              </Button>
+            </Form>
+          </Modal.Body>
+        </Modal>
+      </Container>
+    </>
+  );
 };
 
-export default AdminPembayaranPage;
+export default AdminPegawaiPage;
