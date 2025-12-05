@@ -13,6 +13,7 @@ import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminLayananPage from "../pages/admin/AdminLayananPage";
 import AdminPegawaiPage from "../pages/admin/AdminPegawaiPage";
 import AdminPesananPage from "../pages/admin/AdminPesananPage";
+import AdminPelangganPage from "../pages/admin/AdminPelangganPage";   // ⭐ DITAMBAHKAN
 
 // USER PAGES
 import LoginPage from "../pages/pelanggan/LoginPage";
@@ -27,6 +28,7 @@ function LayoutRouter() {
   const location = useLocation();
   const role = localStorage.getItem("role");
 
+  // Navigation berdasarkan role
   const customerRoutes = [
     { name: "Home", path: "/home" },
     { name: "Layanan", path: "/layanan" },
@@ -38,12 +40,14 @@ function LayoutRouter() {
     { name: "Dashboard", path: "/admin/dashboard" },
     { name: "Layanan", path: "/admin/layanan" },
     { name: "Pegawai", path: "/admin/pegawai" },
+    { name: "Pelanggan", path: "/admin/pelanggan" },  // ⭐ DITAMBAHKAN
     { name: "Pesanan", path: "/admin/pesanan" },
   ];
 
   const navRoutes = role === "admin" ? adminRoutes : customerRoutes;
 
-  const hideNavbar = ["/", "/login", "/register"].includes(location.pathname);
+  // Jangan tampilkan navbar di login/register
+  const hideNavbar = ["/login", "/register"].includes(location.pathname);
 
   return (
     <>
@@ -51,8 +55,7 @@ function LayoutRouter() {
 
       <div style={{ paddingTop: hideNavbar ? 0 : 100 }}>
         <Routes>
-
-          {/* AUTH */}
+          {/* Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
@@ -67,11 +70,11 @@ function LayoutRouter() {
           <Route path="/admin/dashboard" element={<ProtectedAdmin><AdminDashboardPage /></ProtectedAdmin>} />
           <Route path="/admin/layanan" element={<ProtectedAdmin><AdminLayananPage /></ProtectedAdmin>} />
           <Route path="/admin/pegawai" element={<ProtectedAdmin><AdminPegawaiPage /></ProtectedAdmin>} />
+          <Route path="/admin/pelanggan" element={<ProtectedAdmin><AdminPelangganPage /></ProtectedAdmin>} />  {/* ⭐ ROUTE BARU */}
           <Route path="/admin/pesanan" element={<ProtectedAdmin><AdminPesananPage /></ProtectedAdmin>} />
 
-          {/* DEFAULT */}
+          {/* Default */}
           <Route path="*" element={<LoginPage />} />
-
         </Routes>
       </div>
     </>

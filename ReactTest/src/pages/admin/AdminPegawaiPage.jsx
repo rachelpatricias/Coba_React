@@ -22,6 +22,7 @@ const AdminPegawaiPage = () => {
     { name: "Layanan", path: "/admin/layanan" },
     { name: "Pegawai", path: "/admin/pegawai" },
     { name: "Pesanan", path: "/admin/pesanan" },
+    { name: "Pelanggan", path: "/admin/pelanggan"}
   ];
 
   useEffect(() => {

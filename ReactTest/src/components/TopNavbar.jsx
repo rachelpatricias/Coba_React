@@ -1,17 +1,16 @@
-// src/components/TopNavbar.jsx
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar, Container, Nav, Button } from "react-bootstrap";
 
-import logo from "../assets/images/logo.png"; // Pastikan path benar
+import logo from "../assets/images/logo.png";
 import "./TopNavbar.css";
 
 const TopNavbar = ({ routes }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Hide navbar di login/register
-  if (["/login", "/register"].includes(location.pathname)) return null;
+  // Hide navbar di halaman login/register
+ if (["/", "/login", "/register"].includes(location.pathname)) return null;
 
   const role = localStorage.getItem("role");
 
@@ -24,13 +23,10 @@ const TopNavbar = ({ routes }) => {
   })();
 
   const userName =
-    user?.nama ||
-    user?.username ||
-    (role === "admin" ? "Admin" : "Pelanggan");
+    user?.nama || user?.username || (role === "admin" ? "Admin" : "Pelanggan");
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("role");
+    localStorage.clear();
     navigate("/login");
   };
 
@@ -38,7 +34,7 @@ const TopNavbar = ({ routes }) => {
     <Navbar fixed="top" expand="lg" className="custom-navbar shadow-sm">
       <Container>
 
-        {/* LOGO + BRAND */}
+        {/* LOGO & BRAND */}
         <Navbar.Brand
           style={{ cursor: "pointer" }}
           onClick={() => navigate(role === "admin" ? "/admin/dashboard" : "/home")}
@@ -59,7 +55,7 @@ const TopNavbar = ({ routes }) => {
         <Navbar.Collapse>
           <Nav className="ms-auto align-items-center">
 
-            {/* NAVIGATION BUTTONS */}
+            {/* Dynamic Nav Menu */}
             {routes?.map((route, idx) => (
               <Nav.Link key={idx} className="me-2">
                 <Button
@@ -73,22 +69,13 @@ const TopNavbar = ({ routes }) => {
               </Nav.Link>
             ))}
 
-            {/* USER + LOGOUT */}
-            {role ? (
+            {/* User Greeting + Logout */}
+            {role && (
               <>
                 <span className="fw-semibold me-3">Hai, {userName}</span>
                 <Button variant="danger" className="logout-btn" onClick={handleLogout}>
                   Logout
                 </Button>
-              </>
-            ) : (
-              <>
-                <Nav.Link onClick={() => navigate("/login")}>
-                  <Button className="nav-btn">Login</Button>
-                </Nav.Link>
-                <Nav.Link onClick={() => navigate("/register")}>
-                  <Button className="nav-btn active">Daftar</Button>
-                </Nav.Link>
               </>
             )}
           </Nav>
