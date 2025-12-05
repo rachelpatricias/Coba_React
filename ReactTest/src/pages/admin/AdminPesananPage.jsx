@@ -13,8 +13,9 @@ const AdminPesananPage = () => {
     { name: "Dashboard", path: "/admin/dashboard" },
     { name: "Layanan", path: "/admin/layanan" },
     { name: "Pegawai", path: "/admin/pegawai" },
-    { name: "Pelanggan", path: "/admin/pelanggan" },
-    { name: "Pesanan", path: "/admin/pesanan" }
+    { name: "Pesanan", path: "/admin/pesanan" },
+    { name: "Pelanggan", path: "/admin/pelanggan" }
+    
   ];
 
   useEffect(() => {
