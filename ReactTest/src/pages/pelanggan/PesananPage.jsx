@@ -24,14 +24,38 @@ const PesananPage = () => {
     load();
   }, []);
 
+  // 🟢 Fungsi Batalkan
   const cancel = async (id) => {
     try {
       await apiFetch(`/pemesanan/delete/${id}`, { method: "DELETE" });
-      toast.success("Pesanan dibatalkan");
+      toast.success("Pesanan berhasil dibatalkan");
       load();
     } catch {
       toast.error("Gagal membatalkan pesanan");
     }
+  };
+
+  // 🟡 Badge warna status
+  const renderStatus = (status) => {
+    const colors = {
+      pending: "warning",
+      sedang_dilayani: "info",
+      selesai: "success",
+      dibatalkan: "danger",
+    };
+
+    const labels = {
+      pending: "Pending",
+      sedang_dilayani: "Sedang Dilayani",
+      selesai: "Selesai",
+      dibatalkan: "Dibatalkan",
+    };
+
+    return (
+      <Badge bg={colors[status] || "secondary"} style={{ padding: "6px 12px" }}>
+        {labels[status] || status}
+      </Badge>
+    );
   };
 
   return (
@@ -65,16 +89,12 @@ const PesananPage = () => {
                     <td>{idx + 1}</td>
                     <td>{p.layanan?.nama_layanan}</td>
                     <td>{p.tanggal_booking}</td>
-                    <td>{formatToAMPM(p.jam_booking || "00:00")}</td>
+                    <td>{formatToAMPM(p.jam_booking)}</td>
 
-                    <td>
-                      <Badge
-                        bg={p.status_pemesanan === "pending" ? "warning" : "success"}
-                      >
-                        {p.status_pemesanan}
-                      </Badge>
-                    </td>
+                    {/* STATUS BADGE */}
+                    <td>{renderStatus(p.status_pemesanan)}</td>
 
+                    {/* AKSI */}
                     <td>
                       {p.status_pemesanan === "pending" && (
                         <>

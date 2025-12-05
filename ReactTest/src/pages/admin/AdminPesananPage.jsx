@@ -1,6 +1,6 @@
 // src/pages/admin/AdminPesananPage.jsx
 import React, { useEffect, useState } from "react";
-import { Container, Table, Badge } from "react-bootstrap";
+import { Container, Table, Badge, Form } from "react-bootstrap";
 import { toast } from "sonner";
 import { apiFetch } from "../../api/api.js";
 import { formatToAMPM } from "../../utils/time.js";
@@ -13,8 +13,8 @@ const AdminPesananPage = () => {
     { name: "Dashboard", path: "/admin/dashboard" },
     { name: "Layanan", path: "/admin/layanan" },
     { name: "Pegawai", path: "/admin/pegawai" },
-    { name: "Pesanan", path: "/admin/pesanan" },
-    { name: "Pelanggan", path: "/admin/pelanggan" }
+    { name: "Pelanggan", path: "/admin/pelanggan" },
+    { name: "Pesanan", path: "/admin/pesanan" }
   ];
 
   useEffect(() => {
@@ -30,8 +30,36 @@ const AdminPesananPage = () => {
     }
   };
 
-  // 🔥 Fungsi untuk menampilkan status dalam bentuk badge
-  const renderStatus = (status) => {
+  // ======================
+  // UPDATE STATUS
+  // ======================
+  const updateStatus = async (id, status) => {
+    const booking = bookings.find((b) => b.id_pemesanan === id);
+
+    try {
+      await apiFetch("/pemesanan/update", {
+        method: "POST",
+        body: JSON.stringify({
+          id_pemesanan: id,
+          id_layanan: booking.id_layanan,
+          id_pegawai: booking.id_pegawai,
+          tanggal_booking: booking.tanggal_booking,
+          jam_booking: booking.jam_booking,
+          status_pemesanan: status,
+        }),
+      });
+
+      toast.success("Status berhasil diperbarui");
+      loadBookings();
+    } catch (err) {
+      toast.error("Gagal update status");
+    }
+  };
+
+  // ======================
+  // BADGE STATUS
+  // ======================
+  const renderBadge = (status) => {
     const colors = {
       pending: "warning",
       sedang_dilayani: "primary",
@@ -46,7 +74,7 @@ const AdminPesananPage = () => {
       dibatalkan: "Dibatalkan",
     };
 
-    return <Badge bg={colors[status] || "secondary"}>{labels[status] || status}</Badge>;
+    return <Badge bg={colors[status]}>{labels[status]}</Badge>;
   };
 
   return (
@@ -83,7 +111,27 @@ const AdminPesananPage = () => {
                   <td>{b.tanggal_pemesanan}</td>
                   <td>{b.tanggal_booking}</td>
                   <td>{formatToAMPM(b.jam_booking)}</td>
-                  <td>{renderStatus(b.status_pemesanan)}</td>
+
+                  {/* STATUS KOLOM */}
+                  <td>
+                    {/* Jika pending → tampilkan dropdown */}
+                    {b.status_pemesanan === "pending" ? (
+                      <Form.Select
+                        size="sm"
+                        defaultValue={b.status_pemesanan}
+                        onChange={(e) =>
+                          updateStatus(b.id_pemesanan, e.target.value)
+                        }
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="sedang_dilayani">Sedang Dilayani</option>
+                        {/* <option value="selesai">Selesai</option>
+                        <option value="dibatalkan">Dibatalkan</option> */}
+                      </Form.Select>
+                    ) : (
+                      renderBadge(b.status_pemesanan)
+                    )}
+                  </td>
                 </tr>
               ))
             )}
