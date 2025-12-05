@@ -3,27 +3,53 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar, Container, Nav, Button } from "react-bootstrap";
 
-const TopNavbar = ({ routes }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
+import logo from "../assets/images/logo.png"; // Pastikan path benar
+import "./TopNavbar.css";
 
-  const role = localStorage.getItem("role"); // "admin" | "pelanggan" | null
-  const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+const TopNavbar = ({ routes }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Hide navbar di login/register
+  if (["/login", "/register"].includes(location.pathname)) return null;
+
+  const role = localStorage.getItem("role");
+
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
+    }
+  })();
+
+  const userName =
+    user?.nama ||
+    user?.username ||
+    (role === "admin" ? "Admin" : "Pelanggan");
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("role");
-    navigate("/");
+    navigate("/login");
   };
 
   return (
-    <Navbar fixed="top" expand="lg" className="bg-body-tertiary shadow">
+    <Navbar fixed="top" expand="lg" className="custom-navbar shadow-sm">
       <Container>
-        <Navbar.Brand style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+
+        {/* LOGO + BRAND */}
+        <Navbar.Brand
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate(role === "admin" ? "/admin/dashboard" : "/home")}
+        >
           <div className="d-flex align-items-center">
-            <div style={{ width: 46, height: 46, background: "#f3c5d1", borderRadius: 8 }} />
+            <img src={logo} alt="logo" className="nav-logo" />
+
             <div className="ms-2">
-              <div className="mb-0 fw-bold">Aurora Salon</div>
+              <div className="fw-bold" style={{ fontSize: "18px" }}>
+                Aurora Salon
+              </div>
               <div className="small text-muted">Beauty & Care</div>
             </div>
           </div>
@@ -32,30 +58,36 @@ const TopNavbar = ({ routes }) => {
         <Navbar.Toggle />
         <Navbar.Collapse>
           <Nav className="ms-auto align-items-center">
+
+            {/* NAVIGATION BUTTONS */}
             {routes?.map((route, idx) => (
-              <Nav.Link key={idx} onClick={() => navigate(route.path)} className="me-2">
-                <Button variant={location.pathname === route.path ? "primary" : "light"}>
+              <Nav.Link key={idx} className="me-2">
+                <Button
+                  className={`nav-btn ${
+                    location.pathname === route.path ? "active" : ""
+                  }`}
+                  onClick={() => navigate(route.path)}
+                >
                   {route.name}
                 </Button>
               </Nav.Link>
             ))}
 
+            {/* USER + LOGOUT */}
             {role ? (
               <>
-                <Nav.Link className="me-2">
-                  <span className="me-2">Hai, {user?.username || (role === "admin" ? "Admin" : "Pelanggan")}</span>
-                </Nav.Link>
-                <Nav.Link>
-                  <Button variant="danger" onClick={handleLogout}>Logout</Button>
-                </Nav.Link>
+                <span className="fw-semibold me-3">Hai, {userName}</span>
+                <Button variant="danger" className="logout-btn" onClick={handleLogout}>
+                  Logout
+                </Button>
               </>
             ) : (
               <>
-                <Nav.Link onClick={() => navigate("/login")} className="me-2">
-                  <Button variant="outline-primary">Login</Button>
+                <Nav.Link onClick={() => navigate("/login")}>
+                  <Button className="nav-btn">Login</Button>
                 </Nav.Link>
                 <Nav.Link onClick={() => navigate("/register")}>
-                  <Button variant="primary">Daftar</Button>
+                  <Button className="nav-btn active">Daftar</Button>
                 </Nav.Link>
               </>
             )}
