@@ -7,8 +7,8 @@ import DynamicPageTitle from "../components/DynamicPageTitle";
 const adminRoutes = [
   { path: "/admin/dashboard", name: "Dashboard" },
   { path: "/admin/layanan", name: "Layanan" },
+  { path: "/admin/pegawai", name: "Pegawai" }, 
   { path: "/admin/pesanan", name: "Pesanan" },
-  { path: "/admin/jadwal", name: "Stylists" },
 ];
 
 const AdminLayout = () => {
