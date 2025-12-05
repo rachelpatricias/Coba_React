@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Form, FloatingLabel, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import axios from "axios";
+import axios from "../../axiosConfig";
 import "./LoginPage.css";
 import Logo from "../../assets/images/Logo.png";
 
@@ -92,11 +92,12 @@ const LoginPage = () => {
       if (role === "admin") return navigate("/admin/dashboard");
       return navigate("/home");
     } catch (error) {
-      const msg = error.response?.data?.message;
+     const msg = error.response?.data?.message;
 
-      if (msg === "Email atau password salah") {
+      console.log("ERROR LOGIN:", msg);
+
+      if (msg && msg.toLowerCase().includes("email atau password salah")) {
         toast.error("Akun belum terdaftar. Silakan daftar dulu.");
-
         return;
       }
 
