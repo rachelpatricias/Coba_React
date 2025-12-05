@@ -1,15 +1,13 @@
-// src/routes/protected/ProtectedAdmin.jsx
-import React from "react";
 import { Navigate } from "react-router-dom";
 
 const ProtectedAdmin = ({ children }) => {
-  try {
-    const role = localStorage.getItem("role");
-    if (role !== "admin") return <Navigate to="/admin/login" replace />;
-    return children;
-  } catch {
-    return <Navigate to="/admin/login" replace />;
-  }
+  const role = localStorage.getItem("role");
+  const token = localStorage.getItem("token");
+
+  if (!token) return <Navigate to="/login" replace />; // belum login
+  if (role !== "admin") return <Navigate to="/login" replace />; // bukan admin
+
+  return children;
 };
 
 export default ProtectedAdmin;
