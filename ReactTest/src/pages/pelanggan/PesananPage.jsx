@@ -1,6 +1,6 @@
 // src/pages/pelanggan/PesananPage.jsx
 import React, { useEffect, useState } from "react";
-import { Container, Table, Button, Badge } from "react-bootstrap";
+import { Container, Table, Button, Badge, Modal } from "react-bootstrap";
 import { toast } from "sonner";
 import { apiFetch } from "../../api/api";
 import { formatToAMPM } from "../../utils/time";
@@ -9,6 +9,8 @@ import "./PesananPage.css";
 
 const PesananPage = () => {
   const [data, setData] = useState([]);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
   const navigate = useNavigate();
 
   const load = async () => {
@@ -24,18 +26,25 @@ const PesananPage = () => {
     load();
   }, []);
 
-  // 🟢 Fungsi Batalkan
-  const cancel = async (id) => {
+  // 🔥 Tampilkan modal, simpan ID
+  const openCancelModal = (id) => {
+    setSelectedId(id);
+    setShowCancelModal(true);
+  };
+
+  // 🔥 Lakukan pembatalan
+  const confirmCancel = async () => {
     try {
-      await apiFetch(`/pemesanan/delete/${id}`, { method: "DELETE" });
+      await apiFetch(`/pemesanan/delete/${selectedId}`, { method: "DELETE" });
+
       toast.success("Pesanan berhasil dibatalkan");
+      setShowCancelModal(false);
       load();
     } catch {
       toast.error("Gagal membatalkan pesanan");
     }
   };
 
-  // 🟡 Badge warna status
   const renderStatus = (status) => {
     const colors = {
       pending: "warning",
@@ -90,13 +99,10 @@ const PesananPage = () => {
                     <td>{p.layanan?.nama_layanan}</td>
                     <td>{p.tanggal_booking}</td>
                     <td>{formatToAMPM(p.jam_booking)}</td>
-
-                    {/* STATUS BADGE */}
                     <td>{renderStatus(p.status_pemesanan)}</td>
 
-                    {/* AKSI */}
                     <td>
-                      {p.status_pemesanan === "pending" && (
+                      {p.status_pemesanan === "pending" ? (
                         <>
                           <Button
                             variant="success"
@@ -114,11 +120,13 @@ const PesananPage = () => {
                           <Button
                             variant="danger"
                             size="sm"
-                            onClick={() => cancel(p.id_pemesanan)}
+                            onClick={() => openCancelModal(p.id_pemesanan)}
                           >
                             Batalkan
                           </Button>
                         </>
+                      ) : (
+                        <span className="text-muted">-</span>
                       )}
                     </td>
                   </tr>
@@ -128,6 +136,26 @@ const PesananPage = () => {
           </Table>
         </div>
       </Container>
+
+      {/* 🟣 MODAL KONFIRMASI BATALKAN */}
+      <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Konfirmasi Pembatalan</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          Apakah Anda yakin ingin membatalkan pesanan ini?
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
+            Tidak
+          </Button>
+          <Button variant="danger" onClick={confirmCancel}>
+            Ya, Batalkan Pesanan
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
