@@ -1,0 +1,65 @@
+.pesanan-wrapper {
+  background: #ffe6ef;
+  min-height: 100vh;
+  padding-top: 40px; /* ideal */
+}
+
+/* Judul halaman */
+.pesanan-title {
+  font-weight: 700;
+  color: #cc4c7a;
+  margin-bottom: 25px;
+}
+
+/* Bungkus tabel */
+.pesanan-table-wrapper {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Tabel */
+.pesanan-table {
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.pesanan-table thead {
+  background: #ffb6d5;
+  color: #5a0035;
+}
+
+.pesanan-table tbody tr:hover {
+  background: #ffe3f1;
+  transition: 0.2s ease-in-out;
+}
+
+/* Kolom */
+.pesanan-table th,
+.pesanan-table td {
+  padding: 15px;
+  vertical-align: middle;
+  font-size: 15px;
+}
+
+/* Badge status */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-transform: capitalize;
+  font-size: 13px;
+}
+
+/* Tombol batal */
+.btn-batal {
+  background: #e66363 !important;
+  border: none !important;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.btn-batal:hover {
+  background: #cc4c4c !important;
+}
