@@ -1,50 +1,79 @@
 // src/pages/pelanggan/LayananPage.jsx
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../api/api.js";
 
-const defaultServices = [
-  { id: "s1", name: "Haircut (Potong Rambut)", duration: 45, price: 75000, description: "Potong rambut sesuai model." },
-  { id: "s2", name: "Hair Coloring", duration: 120, price: 250000, description: "Warna rambut profesional." },
-  { id: "s3", name: "Manicure", duration: 60, price: 90000, description: "Perawatan kuku & cat." },
-];
+import "./LayananPage.css";
 
 const LayananPage = () => {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const s = JSON.parse(localStorage.getItem("services"));
-    if (s && s.length) setServices(s);
-    else {
-      localStorage.setItem("services", JSON.stringify(defaultServices));
-      setServices(defaultServices);
-    }
+    apiFetch("/layanan/read")
+      .then((res) => setServices(res || []))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
-    <Container className="mt-3">
-      <h1 className="mb-4">Daftar Layanan</h1>
-      <Row>
-        {services.map((svc) => (
-          <Col md={4} key={svc.id} className="mb-3">
-            <Card>
-              <Card.Body>
-                <Card.Title>{svc.name}</Card.Title>
-                <Card.Text>{svc.description}</Card.Text>
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <div className="small text-muted">Durasi: {svc.duration} menit</div>
-                    <div className="fw-bold">Rp {svc.price.toLocaleString("id-ID")}</div>
-                  </div>
-                  <Button onClick={() => navigate("/booking", { state: { serviceId: svc.id } })}>Booking</Button>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    </Container>
+    <div className="layanan-wrapper">
+      <Container className="py-4">
+
+        <div className="text-center mb-4">
+          <h1 className="layanan-title">Layanan Salon Kami</h1>
+          <p className="layanan-subtitle">
+            Pilih layanan terbaik dari Aurora Salon yang siap membuatmu tampil memukau.
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="danger" />
+            <p className="mt-3 text-muted">Mengambil data layanan...</p>
+          </div>
+        ) : (
+          <Row className="g-4">
+            {services.map((svc) => (
+              <Col md={4} key={svc.id_layanan}>
+                <Card className="layanan-card shadow-sm">
+
+                  <Card.Body>
+                    <Card.Title className="fw-bold layanan-name">
+                      {svc.nama_layanan}
+                    </Card.Title>
+
+                    <Card.Text className="layanan-description">
+                      {svc.deskripsi}
+                    </Card.Text>
+
+                    <div className="d-flex justify-content-between align-items-center mt-3">
+                      <div>
+                        <div className="harga-label">Harga</div>
+                        <div className="layanan-harga">
+                          Rp {Number(svc.harga).toLocaleString()}
+                        </div>
+                      </div>
+
+                      <Button
+                        className="btn-booking"
+                        onClick={() =>
+                          navigate("/booking", { state: { serviceId: svc.id_layanan } })
+                        }
+                      >
+                        Booking
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
+
+      </Container>
+    </div>
   );
 };
 

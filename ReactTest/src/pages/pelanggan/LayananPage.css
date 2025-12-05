@@ -1,0 +1,58 @@
+.layanan-wrapper {
+  background: #ffe6f1;
+  min-height: 100vh;
+}
+
+.layanan-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #d63384;
+}
+
+.layanan-subtitle {
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+.layanan-card {
+  border-radius: 15px;
+  padding-top: 5px;
+  transition: 0.25s;
+  background: white;
+}
+
+.layanan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.layanan-name {
+  color: #d63384;
+}
+
+.layanan-description {
+  color: #777;
+  min-height: 50px;
+}
+
+.layanan-harga {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #d63384;
+}
+
+.harga-label {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.btn-booking {
+  background: #ff66a3;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.btn-booking:hover {
+  background: #e0558f;
+}
