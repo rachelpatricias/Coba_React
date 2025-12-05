@@ -1,0 +1,64 @@
+/* Wrapper background */
+.booking-wrapper {
+  background: #ffe6f1;
+  min-height: 100vh;
+  padding-top: 20px;
+}
+
+/* Title Section */
+.booking-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #d63384;
+}
+
+/* Form Styling */
+.form-control,
+.form-select {
+  border-radius: 10px !important;
+  padding: 12px;
+  border: 1.5px solid #f1b6c7;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #ff5fa8;
+  box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.2);
+}
+
+/* Button Booking */
+.btn-booking {
+  background: #ff66a3;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: 0.25s ease;
+}
+
+.btn-booking:hover {
+  background: #e0558f;
+}
+
+/* Card Ringkasan */
+.ringkasan-card {
+  border-radius: 15px;
+  background: white;
+  transition: 0.25s ease;
+  border: none;
+}
+
+.ringkasan-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+/* Text Styling */
+.text-muted {
+  font-size: 0.9rem;
+  color: #777 !important;
+}
+
+hr {
+  border-color: #ffd1e1;
+}
