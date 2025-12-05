@@ -1,0 +1,88 @@
+/* ============= WRAPPER BACKGROUND ============= */
+.pembayaran-wrapper {
+  background-color: #fde8ef; /* soft pink */
+  min-height: 100vh;
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+/* ============= TITLE ============= */
+.pembayaran-title {
+  font-weight: 700;
+  color: #c2185b; /* elegant deep pink */
+  margin-bottom: 25px;
+}
+
+/* ============= CARD DETAIL PESANAN ============= */
+.pembayaran-card {
+  border-radius: 15px;
+  padding: 20px;
+  border: none;
+  background: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.pembayaran-card h5 {
+  color: #c2185b;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.detail-row {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.detail-row span {
+  font-weight: 600;
+  color: #444;
+}
+
+/* ============= TOTAL BAYAR ============= */
+.total-bayar {
+  margin-top: 15px;
+  padding: 12px;
+  background: #ffe4ed;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #c2185b;
+  font-size: 17px;
+  border: 1px solid #f8b6c9;
+}
+
+/* ============= FORM PEMBAYARAN ============= */
+.form-pembayaran select {
+  border-radius: 10px !important;
+  padding: 12px !important;
+}
+
+.form-pembayaran .form-floating label {
+  padding-left: 15px;
+}
+
+/* ============= BUTTON BAYAR ============= */
+.btn-bayar {
+  background-color: #ff4081 !important;
+  border: none !important;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 10px;
+  transition: 0.2s;
+}
+
+.btn-bayar:hover {
+  background-color: #e73370 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 64, 129, 0.4);
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+  .pembayaran-card {
+    padding: 15px;
+  }
+
+  .total-bayar {
+    font-size: 15px;
+  }
+}
