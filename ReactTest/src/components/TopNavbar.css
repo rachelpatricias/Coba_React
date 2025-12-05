@@ -1,0 +1,52 @@
+/* NAVBAR BACKGROUND */
+.custom-navbar {
+  background: #ffffff !important;
+  padding: 10px 0;
+  box-shadow: 0 2px 10px rgba(255, 115, 165, 0.15);
+}
+
+/* LOGO FIX — Tidak membesar lagi */
+.nav-logo {
+  width: 46px;
+  height: 46px;
+  max-width: 46px;
+  max-height: 46px;
+  object-fit: cover;       /* crop jika gambar besar */
+  border-radius: 10px;
+  border: 1px solid #ffd3e3;
+  background: #ffe4ef;
+}
+
+/* DEFAULT (TIDAK AKTIF) */
+.nav-btn {
+  background: white !important;
+  color: #444 !important;
+  border-radius: 12px !important;
+  border: 1px solid #e6e6e6 !important;
+  padding: 6px 20px !important;
+  font-weight: 500;
+  transition: 0.25s ease;
+}
+
+/* HOVER */
+.nav-btn:hover {
+  background: #ffe7f2 !important;
+  color: #d63384 !important;
+  border-color: #ffb3d6 !important;
+}
+
+/* ACTIVE (tombol halaman sedang dibuka) */
+.nav-btn.active {
+  background: #ff4fa3 !important;
+  color: white !important;
+  border-color: #ff4fa3 !important;
+  box-shadow: 0 4px 12px rgba(255, 79, 163, 0.45);
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+  border-radius: 12px !important;
+  padding: 6px 16px !important;
+  background: #ff4f4f !important;
+  border: none !important;
+}
