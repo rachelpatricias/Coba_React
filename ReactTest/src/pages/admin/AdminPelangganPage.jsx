@@ -1,8 +1,16 @@
+// src/pages/admin/AdminPelangganPage.jsx
 import React, { useEffect, useState } from "react";
-import { Container, Table, Button, Modal, Form } from "react-bootstrap";
+import { Container, Table, Button, Modal, Form, Card } from "react-bootstrap";
 import { toast } from "sonner";
 import { apiFetch } from "../../api/api.js";
 import TopNavbar from "../../components/TopNavbar.jsx";
+
+const THEME = {
+  pink: "#d63384",
+  darkPink: "#b31b6b",
+  softPink: "#ffe6f1",
+  hoverPink: "#ff99c8",
+};
 
 const AdminPelangganPage = () => {
   const [data, setData] = useState([]);
@@ -21,7 +29,7 @@ const AdminPelangganPage = () => {
     { name: "Layanan", path: "/admin/layanan" },
     { name: "Pegawai", path: "/admin/pegawai" },
     { name: "Pesanan", path: "/admin/pesanan" },
-    { name: "Pelanggan", path: "/admin/pelanggan" }, // MENU BARU
+    { name: "Pelanggan", path: "/admin/pelanggan" },
   ];
 
   // =============================
@@ -39,15 +47,6 @@ const AdminPelangganPage = () => {
   useEffect(() => {
     loadData();
   }, []);
-
-  // =============================
-  // OPEN ADD
-  // =============================
-  const openAdd = () => {
-    setEditing(null);
-    setForm({ nama: "", email: "", no_hp: "", alamat: "" });
-    setShowModal(true);
-  };
 
   // =============================
   // OPEN EDIT
@@ -89,7 +88,6 @@ const AdminPelangganPage = () => {
 
     try {
       if (editing) {
-        // UPDATE
         await apiFetch(`/pelanggan/update/${editing}`, {
           method: "POST",
           body: JSON.stringify(form),
@@ -97,7 +95,7 @@ const AdminPelangganPage = () => {
 
         toast.success("Pelanggan berhasil diupdate");
       } else {
-        toast.error("Register pelanggan hanya dari user");
+        toast.error("Pelanggan hanya bisa daftar melalui halaman register");
         return;
       }
 
@@ -113,76 +111,127 @@ const AdminPelangganPage = () => {
       <TopNavbar routes={adminRoutes} />
 
       <Container style={{ paddingTop: 100 }}>
-        <h2>Kelola Pelanggan</h2>
+        <h2
+          className="fw-bold mb-3"
+          style={{ color: THEME.pink }}
+        >
+          Kelola Pelanggan
+        </h2>
 
-        <Button className="my-3" onClick={openAdd} disabled>
-          Tambah Pelanggan (dinonaktifkan)
-        </Button>
-        <p className="text-muted">*Pelanggan hanya dapat register dari halaman register.</p>
+        {/* CARD WRAPPER */}
+        <Card
+          className="shadow-sm p-4 mb-4"
+          style={{
+            background: THEME.softPink,
+            borderRadius: "15px",
+            border: "none",
+          }}
+        >
+          <Button
+            className="mb-3"
+            disabled
+            style={{
+              background: THEME.pink,
+              border: "none",
+              borderRadius: "20px",
+              padding: "8px 18px",
+            }}
+            onMouseOver={(e) => (e.target.style.background = THEME.darkPink)}
+            onMouseOut={(e) => (e.target.style.background = THEME.pink)}
+          >
+            + Tambah Pelanggan (disabled)
+          </Button>
 
-        <Table bordered hover>
-          <thead className="table-primary">
-            <tr>
-              <th>No</th>
-              <th>Nama</th>
-              <th>Email</th>
-              <th>No HP</th>
-              <th>Alamat</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+          <p className="text-muted">
+            *Pelanggan hanya dapat register melalui halaman Register.
+          </p>
 
-          <tbody>
-            {data.length === 0 ? (
+          <Table bordered hover>
+            <thead style={{ background: THEME.pink, color: "white" }}>
               <tr>
-                <td colSpan="6" className="text-center">
-                  Tidak ada data
-                </td>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Email</th>
+                <th>No HP</th>
+                <th>Alamat</th>
+                <th>Aksi</th>
               </tr>
-            ) : (
-              data.map((p, i) => (
-                <tr key={p.id_pelanggan}>
-                  <td>{i + 1}</td>
-                  <td>{p.nama}</td>
-                  <td>{p.email}</td>
-                  <td>{p.no_hp}</td>
-                  <td>{p.alamat}</td>
-                  <td>
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => openEdit(p)}
-                    >
-                      Edit
-                    </Button>
+            </thead>
 
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDelete(p.id_pelanggan)}
-                    >
-                      Hapus
-                    </Button>
+            <tbody>
+              {data.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-3 text-muted">
+                    Tidak ada data pelanggan
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </Table>
+              ) : (
+                data.map((p, i) => (
+                  <tr key={p.id_pelanggan}>
+                    <td>{i + 1}</td>
+                    <td>{p.nama}</td>
+                    <td>{p.email}</td>
+                    <td>{p.no_hp}</td>
+                    <td>{p.alamat}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        className="me-2"
+                        style={{
+                          background: "#ffb3d9",
+                          border: "none",
+                        }}
+                        onMouseOver={(e) =>
+                          (e.target.style.background = THEME.hoverPink)
+                        }
+                        onMouseOut={(e) =>
+                          (e.target.style.background = "#ffb3d9")
+                        }
+                        onClick={() => openEdit(p)}
+                      >
+                        Edit
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        style={{
+                          background: "#ff4d6d",
+                          border: "none",
+                        }}
+                        onMouseOver={(e) =>
+                          (e.target.style.background = "#d90429")
+                        }
+                        onMouseOut={(e) =>
+                          (e.target.style.background = "#ff4d6d")
+                        }
+                        onClick={() => handleDelete(p.id_pelanggan)}
+                      >
+                        Hapus
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </Table>
+        </Card>
       </Container>
 
-      {/* ========================= */}
-      {/* MODAL FORM */}
-      {/* ========================= */}
+      {/* MODAL FORM BEAUTIFIED */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
+        <Modal.Header
+          closeButton
+          style={{
+            background: THEME.pink,
+            color: "white",
+          }}
+        >
           <Modal.Title>
             {editing ? "Edit Pelanggan" : "Tambah Pelanggan"}
           </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body style={{ background: "#fff7fb" }}>
           <Form onSubmit={handleSubmit}>
             {["nama", "email", "no_hp", "alamat"].map((field) => (
               <Form.Group className="mb-3" key={field}>
@@ -196,7 +245,21 @@ const AdminPelangganPage = () => {
               </Form.Group>
             ))}
 
-            <Button type="submit" className="w-100">
+            <Button
+              type="submit"
+              className="w-100"
+              style={{
+                background: THEME.pink,
+                border: "none",
+                borderRadius: "20px",
+              }}
+              onMouseOver={(e) =>
+                (e.target.style.background = THEME.darkPink)
+              }
+              onMouseOut={(e) =>
+                (e.target.style.background = THEME.pink)
+              }
+            >
               Simpan
             </Button>
           </Form>

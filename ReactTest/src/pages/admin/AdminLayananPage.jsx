@@ -1,9 +1,16 @@
 // src/pages/admin/AdminLayananPage.jsx
 import { useEffect, useState } from "react";
-import { Container, Table, Button, Modal, Form } from "react-bootstrap";
+import { Container, Table, Button, Modal, Form, Card } from "react-bootstrap";
 import { toast } from "sonner";
 import { apiFetch } from "../../api/api.js";
 import TopNavbar from "../../components/TopNavbar.jsx";
+
+const THEME = {
+  pink: "#d63384",
+  softPink: "#ffe6f1",
+  darkPink: "#b31b6b",
+  hoverPink: "#ff99c8",
+};
 
 const AdminLayananPage = () => {
   const [services, setServices] = useState([]);
@@ -21,10 +28,8 @@ const AdminLayananPage = () => {
     { name: "Layanan", path: "/admin/layanan" },
     { name: "Pegawai", path: "/admin/pegawai" },
     { name: "Pesanan", path: "/admin/pesanan" },
-    { name: "Pelanggan", path: "/admin/pelanggan"}
+    { name: "Pelanggan", path: "/admin/pelanggan" },
   ];
-
-
 
   useEffect(() => {
     fetchData();
@@ -59,19 +64,18 @@ const AdminLayananPage = () => {
   };
 
   const handleDelete = async (id) => {
-  if (!window.confirm("Yakin hapus layanan?")) return;
+    if (!window.confirm("Yakin hapus layanan?")) return;
 
-  try {
-    await apiFetch(`/layanan/delete/${id}`, {
-      method: "DELETE",
-    });
-    toast.success("Berhasil dihapus");
-    fetchData();
-  } catch {
-    toast.error("Gagal menghapus layanan");
-  }
-};
-
+    try {
+      await apiFetch(`/layanan/delete/${id}`, {
+        method: "DELETE",
+      });
+      toast.success("Berhasil dihapus");
+      fetchData();
+    } catch {
+      toast.error("Gagal menghapus layanan");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,64 +108,117 @@ const AdminLayananPage = () => {
   return (
     <>
       <TopNavbar routes={adminRoutes} />
+
       <Container style={{ paddingTop: "100px" }}>
-        <h2>Kelola Layanan</h2>
-        <Button className="my-3" onClick={handleAdd}>
-          Tambah Layanan
-        </Button>
+        <h2
+          className="fw-bold mb-3"
+          style={{ color: THEME.pink }}
+        >
+          Kelola Layanan
+        </h2>
 
-        <Table bordered hover>
-          <thead className="table-primary">
-            <tr>
-              <th>No</th>
-              <th>Nama Layanan</th>
-              <th>Harga</th>
-              <th>Deskripsi</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+        {/* Card Wrapper */}
+        <Card
+          className="shadow-sm p-4 mb-4 border-0"
+          style={{
+            background: THEME.softPink,
+            borderRadius: "15px",
+          }}
+        >
+          <Button
+            className="mb-3"
+            onClick={handleAdd}
+            style={{
+              background: THEME.pink,
+              border: "none",
+              borderRadius: "20px",
+              padding: "8px 18px",
+            }}
+            onMouseOver={(e) => (e.target.style.background = THEME.darkPink)}
+            onMouseOut={(e) => (e.target.style.background = THEME.pink)}
+          >
+            + Tambah Layanan
+          </Button>
 
-          <tbody>
-            {services.length === 0 ? (
-              <tr><td colSpan="5" className="text-center">Belum ada layanan</td></tr>
-            ) : (
-              services.map((s, i) => (
-                <tr key={s.id_layanan}>
-                  <td>{i + 1}</td>
-                  <td>{s.nama_layanan}</td>
-                  <td>Rp {Number(s.harga).toLocaleString("id-ID")}</td>
-                  <td>{s.deskripsi}</td>
-                  <td>
-                    <Button
-                      size="sm"
-                      variant="warning"
-                      className="me-2"
-                      onClick={() => handleEdit(s)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      onClick={() => handleDelete(s.id_layanan)}
-                    >
-                      Hapus
-                    </Button>
+          <Table bordered hover>
+            <thead style={{ background: THEME.pink, color: "white" }}>
+              <tr>
+                <th>No</th>
+                <th>Nama Layanan</th>
+                <th>Harga</th>
+                <th>Deskripsi</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {services.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-3 text-muted">
+                    Belum ada layanan
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </Table>
+              ) : (
+                services.map((s, i) => (
+                  <tr key={s.id_layanan}>
+                    <td>{i + 1}</td>
+                    <td>{s.nama_layanan}</td>
+                    <td>Rp {Number(s.harga).toLocaleString("id-ID")}</td>
+                    <td>{s.deskripsi}</td>
+                    <td>
+                      <Button
+                        size="sm"
+                        style={{
+                          background: "#ffb3d9",
+                          border: "none",
+                          marginRight: "6px",
+                        }}
+                        onMouseOver={(e) =>
+                          (e.target.style.background = THEME.hoverPink)
+                        }
+                        onMouseOut={(e) =>
+                          (e.target.style.background = "#ffb3d9")
+                        }
+                        onClick={() => handleEdit(s)}
+                      >
+                        Edit
+                      </Button>
 
-        {/* MODAL */}
+                      <Button
+                        size="sm"
+                        style={{
+                          background: "#ff4d6d",
+                          border: "none",
+                        }}
+                        onMouseOver={(e) =>
+                          (e.target.style.background = "#d90429")
+                        }
+                        onMouseOut={(e) =>
+                          (e.target.style.background = "#ff4d6d")
+                        }
+                        onClick={() => handleDelete(s.id_layanan)}
+                      >
+                        Hapus
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </Table>
+        </Card>
+
+        {/* MODAL FORM */}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
+          <Modal.Header
+            closeButton
+            style={{ background: THEME.pink, color: "white" }}
+          >
             <Modal.Title>{editing ? "Edit Layanan" : "Tambah Layanan"}</Modal.Title>
           </Modal.Header>
-          <Modal.Body>
+          <Modal.Body style={{ background: "#fff7fb" }}>
             <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-2">
+              <Form.Group className="mb-3">
                 <Form.Label>Nama Layanan</Form.Label>
                 <Form.Control
                   name="nama_layanan"
@@ -170,7 +227,7 @@ const AdminLayananPage = () => {
                 />
               </Form.Group>
 
-              <Form.Group className="mb-2">
+              <Form.Group className="mb-3">
                 <Form.Label>Harga</Form.Label>
                 <Form.Control
                   name="harga"
@@ -189,7 +246,21 @@ const AdminLayananPage = () => {
                 />
               </Form.Group>
 
-              <Button type="submit" className="w-100">Simpan</Button>
+              <Button
+                type="submit"
+                className="w-100 mt-2"
+                style={{
+                  background: THEME.pink,
+                  border: "none",
+                  borderRadius: "20px",
+                }}
+                onMouseOver={(e) =>
+                  (e.target.style.background = THEME.darkPink)
+                }
+                onMouseOut={(e) => (e.target.style.background = THEME.pink)}
+              >
+                Simpan
+              </Button>
             </Form>
           </Modal.Body>
         </Modal>
