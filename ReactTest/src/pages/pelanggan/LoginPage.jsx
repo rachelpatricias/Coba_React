@@ -28,9 +28,9 @@ const LoginPage = () => {
     const { email, password } = form;
     let newErrors = {};
 
-    // =======================================
-    // VALIDASI FRONTEND
-    // =======================================
+    // ================================
+    // VALIDASI INPUT
+    // ================================
     if (!email) newErrors.email = "Email wajib diisi";
     if (!password) newErrors.password = "Password wajib diisi";
 
@@ -41,70 +41,79 @@ const LoginPage = () => {
     }
 
     try {
-      let response = null;
-
-      // =======================================
+      // ================================
       // 1. COBA LOGIN ADMIN
-      // =======================================
+      // ================================
       try {
-        response = await axios.post(`${API_BASE}/admin/login`, {
+        const resAdmin = await axios.post(`${API_BASE}/admin/login`, {
           email: email.toLowerCase(),
           password,
         });
 
-        // Jika berhasil, tetapkan role admin
+        // Jika login admin berhasil
         localStorage.setItem("role", "admin");
-      } catch (err) {
-        response = null;
+        localStorage.setItem("token", resAdmin.data.token);
+        localStorage.setItem("user", JSON.stringify(resAdmin.data.data));
+
+        axios.defaults.headers.common["Authorization"] =
+          `Bearer ${resAdmin.data.token}`;
+
+        toast.success("Login admin berhasil!");
+        return navigate("/admin/dashboard");
+
+      } catch (errAdmin) {
+        // Jika admin gagal tetapi bukan error 404/401 → stop
+        if (errAdmin.response?.status >= 500) {
+          toast.error("Terjadi kesalahan server.");
+          return;
+        }
       }
 
-      // =======================================
-      // 2. JIKA BUKAN ADMIN, COBA LOGIN PELANGGAN
-      // =======================================
-      if (!response) {
-        response = await axios.post(`${API_BASE}/pelanggan/login`, {
-          email: email.toLowerCase(),
-          password,
-        });
+      // ================================
+      // 2. LOGIN PELANGGAN
+      // ================================
+      const resUser = await axios.post(`${API_BASE}/pelanggan/login`, {
+        email: email.toLowerCase(),
+        password,
+      });
 
-        // Jika berhasil, role = pelanggan
-        localStorage.setItem("role", "pelanggan");
-      }
+      localStorage.setItem("role", "pelanggan");
+      localStorage.setItem("token", resUser.data.token);
+      localStorage.setItem("user", JSON.stringify(resUser.data.data));
 
-      const data = response.data;
-
-      // =======================================
-      // SIMPAN TOKEN & DATA USER
-      // =======================================
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.data)); // backend memakai 'data', bukan 'user'
-
-      // Setelah login, set default Authorization
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${data.token}`;
+      axios.defaults.headers.common["Authorization"] =
+        `Bearer ${resUser.data.token}`;
 
       toast.success("Login berhasil!");
-
-      // Redirect berdasarkan role
-      const role = localStorage.getItem("role");
-
-      if (role === "admin") return navigate("/admin/dashboard");
       return navigate("/home");
-    } catch (error) {
-     const msg = error.response?.data?.message;
+
+    } catch (errUser) {
+      const msg = errUser.response?.data?.message;
 
       console.log("ERROR LOGIN:", msg);
 
-      if (msg && msg.toLowerCase().includes("email atau password salah")) {
-        toast.error("Akun belum terdaftar. Silakan daftar dulu.");
+      if (!msg) {
+        toast.error("Terjadi kesalahan server.");
         return;
       }
 
-      toast.error(msg || "Login gagal");
+      if (msg?.toLowerCase().trim().includes("email tidak ditemukan")) {
+        toast.error("Email tidak terdaftar. Silakan daftar dulu.");
+        return;
+      }
+
+      if (msg?.toLowerCase().trim().includes("password salah")) {
+        toast.error("Password salah.");
+        return;
+      }
+
+      toast.error(msg);
     }
   };
 
+  // ================================
+  // RENDER UI
+  // ================================
   return (
     <div className="login-bg">
       <div className="login-card">
@@ -138,9 +147,7 @@ const LoginPage = () => {
               name="password"
               value={form.password}
               onChange={handleChange}
-              className={`login-input ${
-                errors.password ? "is-invalid" : ""
-              }`}
+              className={`login-input ${errors.password ? "is-invalid" : ""}`}
             />
             {errors.password && (
               <div className="invalid-feedback">{errors.password}</div>
