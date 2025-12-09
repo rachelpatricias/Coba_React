@@ -26,17 +26,16 @@ const PesananPage = () => {
     load();
   }, []);
 
-  // 🔥 Tampilkan modal, simpan ID
+  // 🟣 Tampilkan modal konfirmasi
   const openCancelModal = (id) => {
     setSelectedId(id);
     setShowCancelModal(true);
   };
 
-  // 🔥 Lakukan pembatalan
+  // 🟣 Eksekusi pembatalan
   const confirmCancel = async () => {
     try {
       await apiFetch(`/pemesanan/delete/${selectedId}`, { method: "DELETE" });
-
       toast.success("Pesanan berhasil dibatalkan");
       setShowCancelModal(false);
       load();
@@ -45,6 +44,7 @@ const PesananPage = () => {
     }
   };
 
+  // 🟣 Badge Status
   const renderStatus = (status) => {
     const colors = {
       pending: "warning",
@@ -102,8 +102,10 @@ const PesananPage = () => {
                     <td>{renderStatus(p.status_pemesanan)}</td>
 
                     <td>
-                      {p.status_pemesanan === "pending" ? (
+                      {(p.status_pemesanan === "pending" ||
+                        p.status_pemesanan === "sedang_dilayani") ? (
                         <>
+                          {/* BAYAR */}
                           <Button
                             variant="success"
                             size="sm"
@@ -117,6 +119,7 @@ const PesananPage = () => {
                             Bayar
                           </Button>
 
+                          {/* BATALKAN */}
                           <Button
                             variant="danger"
                             size="sm"
@@ -137,15 +140,13 @@ const PesananPage = () => {
         </div>
       </Container>
 
-      {/* 🟣 MODAL KONFIRMASI BATALKAN */}
+      {/* MODAL KONFIRMASI PEMBATALAN */}
       <Modal show={showCancelModal} onHide={() => setShowCancelModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Konfirmasi Pembatalan</Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
-          Apakah Anda yakin ingin membatalkan pesanan ini?
-        </Modal.Body>
+        <Modal.Body>Apakah Anda yakin ingin membatalkan pesanan ini?</Modal.Body>
 
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
