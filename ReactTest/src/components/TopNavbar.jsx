@@ -9,10 +9,8 @@ const TopNavbar = ({ routes }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 🔥 Modal Logout State
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  // Hide navbar di login/register
   if (["/", "/login", "/register"].includes(location.pathname)) return null;
 
   const role = localStorage.getItem("role");
@@ -28,7 +26,6 @@ const TopNavbar = ({ routes }) => {
   const userName =
     user?.nama || user?.username || (role === "admin" ? "Admin" : "Pelanggan");
 
-  // 🔥 Logout asli (setelah konfirmasi)
   const confirmLogout = () => {
     localStorage.clear();
     setShowLogoutModal(false);
@@ -78,7 +75,6 @@ const TopNavbar = ({ routes }) => {
                 <>
                   <span className="fw-semibold me-3">Hai, {userName}</span>
 
-                  {/* 🔥 Trigger Modal Logout */}
                   <Button
                     variant="danger"
                     className="logout-btn"
@@ -93,7 +89,6 @@ const TopNavbar = ({ routes }) => {
         </Container>
       </Navbar>
 
-      {/* 🔥 MODAL LOGOUT */}
       <Modal
         show={showLogoutModal}
         onHide={() => setShowLogoutModal(false)}
