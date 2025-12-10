@@ -15,6 +15,8 @@ const THEME = {
 const AdminPelangganPage = () => {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // 🔥 Modal hapus
+  const [selectedId, setSelectedId] = useState(null); // 🔥 ID pelanggan yg mau dihapus
   const [editing, setEditing] = useState(null);
 
   const [form, setForm] = useState({
@@ -32,9 +34,6 @@ const AdminPelangganPage = () => {
     { name: "Pelanggan", path: "/admin/pelanggan" },
   ];
 
-  // =============================
-  // LOAD DATA
-  // =============================
   const loadData = async () => {
     try {
       const res = await apiFetch("/pelanggan/read");
@@ -63,14 +62,21 @@ const AdminPelangganPage = () => {
   };
 
   // =============================
-  // DELETE PELANGGAN
+  // OPEN DELETE MODAL
   // =============================
-  const handleDelete = async (id) => {
-    if (!window.confirm("Yakin ingin menghapus pelanggan ini?")) return;
+  const openDeleteModal = (id) => {
+    setSelectedId(id);
+    setShowDeleteModal(true);
+  };
 
+  // =============================
+  // CONFIRM DELETE
+  // =============================
+  const confirmDelete = async () => {
     try {
-      await apiFetch(`/pelanggan/delete/${id}`, { method: "DELETE" });
+      await apiFetch(`/pelanggan/delete/${selectedId}`, { method: "DELETE" });
       toast.success("Pelanggan berhasil dihapus");
+      setShowDeleteModal(false);
       loadData();
     } catch {
       toast.error("Gagal menghapus pelanggan");
@@ -111,14 +117,10 @@ const AdminPelangganPage = () => {
       <TopNavbar routes={adminRoutes} />
 
       <Container style={{ paddingTop: 100 }}>
-        <h2
-          className="fw-bold mb-3"
-          style={{ color: THEME.pink }}
-        >
+        <h2 className="fw-bold mb-3" style={{ color: THEME.pink }}>
           Kelola Pelanggan
         </h2>
 
-        {/* CARD WRAPPER */}
         <Card
           className="shadow-sm p-4 mb-4"
           style={{
@@ -127,25 +129,6 @@ const AdminPelangganPage = () => {
             border: "none",
           }}
         >
-          <Button
-            className="mb-3"
-            disabled
-            style={{
-              background: THEME.pink,
-              border: "none",
-              borderRadius: "20px",
-              padding: "8px 18px",
-            }}
-            onMouseOver={(e) => (e.target.style.background = THEME.darkPink)}
-            onMouseOut={(e) => (e.target.style.background = THEME.pink)}
-          >
-            + Tambah Pelanggan (disabled)
-          </Button>
-
-          <p className="text-muted">
-            *Pelanggan hanya dapat register melalui halaman Register.
-          </p>
-
           <Table bordered hover>
             <thead style={{ background: THEME.pink, color: "white" }}>
               <tr>
@@ -173,14 +156,12 @@ const AdminPelangganPage = () => {
                     <td>{p.email}</td>
                     <td>{p.no_hp}</td>
                     <td>{p.alamat}</td>
+
                     <td>
                       <Button
                         size="sm"
                         className="me-2"
-                        style={{
-                          background: "#ffb3d9",
-                          border: "none",
-                        }}
+                        style={{ background: "#ffb3d9", border: "none" }}
                         onMouseOver={(e) =>
                           (e.target.style.background = THEME.hoverPink)
                         }
@@ -194,17 +175,14 @@ const AdminPelangganPage = () => {
 
                       <Button
                         size="sm"
-                        style={{
-                          background: "#ff4d6d",
-                          border: "none",
-                        }}
+                        style={{ background: "#ff4d6d", border: "none" }}
                         onMouseOver={(e) =>
                           (e.target.style.background = "#d90429")
                         }
                         onMouseOut={(e) =>
                           (e.target.style.background = "#ff4d6d")
                         }
-                        onClick={() => handleDelete(p.id_pelanggan)}
+                        onClick={() => openDeleteModal(p.id_pelanggan)} // 🔥 Panggil modal delete
                       >
                         Hapus
                       </Button>
@@ -217,7 +195,46 @@ const AdminPelangganPage = () => {
         </Card>
       </Container>
 
-      {/* MODAL FORM BEAUTIFIED */}
+      {/* ============================= */}
+      {/* MODAL DELETE CONFIRMATION */}
+      {/* ============================= */}
+      <Modal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        centered
+      >
+        <Modal.Header
+          closeButton
+          style={{ background: THEME.pink, color: "white" }}
+        >
+          <Modal.Title>Konfirmasi Hapus</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body style={{ background: THEME.softPink }}>
+          Apakah Anda yakin ingin menghapus pelanggan ini?
+        </Modal.Body>
+
+        <Modal.Footer style={{ background: THEME.softPink }}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDeleteModal(false)}
+          >
+            Batal
+          </Button>
+
+          <Button
+            variant="danger"
+            onClick={confirmDelete}
+            style={{ background: THEME.darkPink, border: "none" }}
+          >
+            Ya, Hapus
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* ============================= */}
+      {/* MODAL EDIT FORM */}
+      {/* ============================= */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header
           closeButton
@@ -226,9 +243,7 @@ const AdminPelangganPage = () => {
             color: "white",
           }}
         >
-          <Modal.Title>
-            {editing ? "Edit Pelanggan" : "Tambah Pelanggan"}
-          </Modal.Title>
+          <Modal.Title>Edit Pelanggan</Modal.Title>
         </Modal.Header>
 
         <Modal.Body style={{ background: "#fff7fb" }}>
@@ -253,12 +268,6 @@ const AdminPelangganPage = () => {
                 border: "none",
                 borderRadius: "20px",
               }}
-              onMouseOver={(e) =>
-                (e.target.style.background = THEME.darkPink)
-              }
-              onMouseOut={(e) =>
-                (e.target.style.background = THEME.pink)
-              }
             >
               Simpan
             </Button>
